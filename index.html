@@ -1,0 +1,3088 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Операционная панель — кредитная карта</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    :root {
+      --bg-main: #f8f9fa;
+      --card-bg: #ffffff;
+      --primary: #c62828;
+      --primary-dark: #8e0000;
+      --primary-soft: #ffebee;
+      --text-main: #212121;
+      --text-muted: #757575;
+      --border-soft: #e0e0e0;
+      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius-card: 12px;
+      --transition-fast: 0.2s ease-in-out;
+      --error: #d32f2f;
+      --success: #2e7d32;
+      --warning: #ed6c02;
+      --info: #0288d1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font-family: inherit;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Top bar */
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      padding: 8px 20px;
+    }
+
+    .top-bar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 3px;
+      flex-wrap: nowrap;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      cursor: pointer;
+      background-color: #f1f1f1;
+      color: var(--text-main);
+      transition: var(--transition-fast);
+      min-width: 0;
+      flex: 0 1 auto;
+      max-width: 140px;
+      overflow: hidden;
+    }
+
+    .tab span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tab-main {
+      font-weight: 600;
+    }
+
+    .tab.active {
+      background-color: var(--primary-soft);
+      color: var(--primary-dark);
+      border-color: #f8c1c1;
+    }
+
+    .tab-close-btn {
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .session-indicator {
+      font-size: 13px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-fast);
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn.secondary {
+      background-color: #f1f1f1;
+      color: var(--text-main);
+    }
+
+    .btn.outline {
+      background-color: #ffffff;
+      color: var(--text-main);
+      border: 1px solid var(--border-soft);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .btn:not(:disabled):hover {
+      filter: brightness(0.95);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+      transform: translateY(-1px);
+    }
+
+    /* Sticky info bar */
+
+    .sticky-info {
+      position: sticky;
+      top: 46px;
+      z-index: 190;
+      background-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      padding: 6px 20px 8px;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .sticky-inner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .client-fio {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .client-avatar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--primary-soft);
+      border-radius: 999px;
+      padding: 4px 10px 4px 4px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .client-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .sticky-blocks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sticky-item {
+      font-size: 13px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background-color: #f5f5f5;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+
+    .sticky-item:hover {
+      background-color: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+
+    .sticky-item-label {
+      pointer-events: none;
+    }
+
+    /* Dropdowns */
+
+    .dropdown {
+      position: absolute;
+      top: 34px;
+      left: 0;
+      min-width: 260px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--text-main);
+      display: none;
+      z-index: 210;
+    }
+
+    .dropdown.open {
+      display: block;
+    }
+
+    /* Строка с иконкой и текстом */
+    .dropdown-line {
+      display: grid;
+      grid-template-columns: 24px 1fr;  /* вернули ширину 24px */
+      gap: 6px;
+      margin-bottom: 6px;
+      align-items: start;
+    }
+
+    .dropdown-line i {
+      font-size: 14px;  /* вернули размер иконок к исходному 14px */
+      color: var(--primary-dark);
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    .dropdown-line span {
+      line-height: 1.4;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    /* Для транзакций без иконок */
+    .dropdown-line.no-icon {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dropdown-line.no-icon span {
+      text-align: left;
+    }
+
+    /* Транзакции в выпадающем списке: сгруппированы по дате */
+    .dropdown-transaction-group {
+      margin-bottom: 10px;
+    }
+
+    .dropdown-transaction-group .transaction-date {
+      font-weight: 700;
+      text-align: center;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .dropdown-transaction-group .transaction-detail {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding-left: 8px;
+      margin-bottom: 2px;
+    }
+
+    .dropdown-transaction-group .detail-amount {
+      font-weight: 600;
+    }
+    .dropdown-transaction-group .detail-amount.amount-positive {
+      color: var(--success);
+    }
+    .dropdown-transaction-group .detail-amount.amount-negative {
+      color: var(--error);
+    }
+
+    .dropdown-more {
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .dropdown-more a {
+      cursor: pointer;
+      color: var(--primary-dark);
+      font-weight: 600;
+      font-size: 18px;
+      padding: 4px 8px;
+      display: inline-block;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+      position: relative;
+    }
+
+    .dropdown-more a:hover {
+      background-color: #f0f0f0;
+    }
+
+    .dropdown-more a:hover::after {
+      content: "Открыть подробную информацию";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 300;
+    }
+
+    /* Main layout */
+
+    .app-main {
+      padding: 12px 20px 24px;
+    }
+
+    .columns-main {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-soft);
+      padding: 14px 14px 12px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Recommended operations */
+
+    .recommended-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .recommended-card {
+      flex: 1 1 150px;
+      min-width: 150px;
+      background: linear-gradient(135deg, #ffffff, #ffebee);
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid #f4c4c4;
+      cursor: pointer;
+      font-size: 13px;
+      transition: var(--transition-fast);
+    }
+
+    .recommended-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    /* Open requests */
+
+    .requests-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .request-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      background-color: #ffffff;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .request-item:hover {
+      background-color: #ffebee;
+    }
+
+    .request-icon {
+      color: var(--primary);
+      font-size: 14px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .request-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .request-title {
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .request-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+
+    .request-date {
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .badge-success {
+      background-color: var(--success);
+    }
+    .badge-error {
+      background-color: var(--error);
+    }
+    .badge-warning {
+      background-color: var(--warning);
+    }
+    .badge-info {
+      background-color: var(--info);
+    }
+
+    /* Search */
+
+    .search-row {
+      margin-top: 12px;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 32px 8px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      font-size: 13px;
+      outline: none;
+      background-color: #ffffff;
+      transition: var(--transition-fast);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.15);
+    }
+
+    .search-icon-left {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Operation tiles – увеличенные окошки */
+    .operations-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .operations-column {
+      background-color: #ffffff;
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      padding: 8px 10px 10px;
+    }
+
+    .operations-column-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .operations-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px; /* увеличили отступ */
+    }
+
+    .operation-tile {
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      padding: 10px 6px;
+      font-size: 13px;
+      cursor: pointer;
+      background-color: #ffffff;
+      transition: var(--transition-fast);
+      text-align: center;
+      min-height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      word-break: break-word;
+    }
+
+    .operation-tile-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .operation-tile:hover {
+      background-color: #ffebee;
+      border-color: var(--primary);
+    }
+
+    /* Tab content wrapper */
+
+    .tab-content-wrapper {
+      margin-top: 12px;
+    }
+
+    /* Info tab content */
+
+    .info-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .info-table td {
+      border: 1px solid var(--border-soft);
+      padding: 5px 7px;
+      vertical-align: top;
+    }
+
+    .info-table td:first-child {
+      width: 32%;
+      background-color: #fafafa;
+      font-weight: 500;
+    }
+
+    .list-block {
+      font-size: 13px;
+    }
+
+    .list-block ul {
+      padding-left: 18px;
+      margin: 4px 0 0;
+    }
+
+    /* Portfolio spacing */
+    .portfolio-section {
+      margin-bottom: 20px;
+    }
+    .portfolio-section:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Transactions table */
+    .transactions-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .transactions-table th,
+    .transactions-table td {
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    .transactions-table th {
+      background-color: #f5f5f5;
+    }
+
+    /* SMS table */
+    .sms-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .sms-table th,
+    .sms-table td {
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      text-align: left;
+      font-size: 12px;
+    }
+    .sms-table th {
+      background-color: #f5f5f5;
+    }
+    .sms-table th:nth-child(1),
+    .sms-table td:nth-child(1),
+    .sms-table th:nth-child(2),
+    .sms-table td:nth-child(2) {
+      text-align: center;
+    }
+
+    /* Simple operation content */
+
+    .op-simple-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .op-simple-steps {
+      list-style: decimal;
+      padding-left: 18px;
+      font-size: 13px;
+    }
+
+    .op-simple-steps li {
+      margin-bottom: 4px;
+    }
+
+    /* Card wizard */
+
+    .wizard-layout {
+      display: grid;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 12px;
+    }
+
+    .wizard-steps-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .wizard-step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      background-color: #fafafa;
+    }
+
+    .wizard-step-item.current {
+      border-color: var(--primary);
+      background-color: var(--primary-soft);
+    }
+
+    .wizard-step-item.completed {
+      border-color: #c8e6c9;
+      background-color: #e8f5e9;
+    }
+
+    .wizard-step-index {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1px solid var(--border-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      background-color: #ffffff;
+    }
+
+    .wizard-step-item.completed .wizard-step-index {
+      background-color: #4caf50;
+      color: #ffffff;
+      border-color: #4caf50;
+    }
+
+    .wizard-step-title-main {
+      font-size: 13px;
+    }
+
+    .wizard-form-section {
+      font-size: 13px;
+    }
+
+    .wizard-form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .wizard-form-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .wizard-form-sub {
+      display: none; /* скрыто */
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .form-label {
+      font-size: 12px;
+    }
+
+    .form-control,
+    .form-select,
+    .form-textarea {
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      font-size: 13px;
+      outline: none;
+      background-color: #ffffff;
+      transition: var(--transition-fast);
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.15);
+    }
+
+    .form-textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .checkbox-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .form-error {
+      font-size: 11px;
+      color: var(--error);
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .radio-card {
+      border-radius: 10px;
+      border: 1px solid var(--border-soft);
+      padding: 6px 8px;
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      cursor: pointer;
+      background-color: #ffffff;
+      font-size: 13px;
+    }
+
+    .radio-card.selected {
+      border-color: var(--primary);
+      background-color: #ffebee;
+    }
+
+    .card-type-img {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      font-size: 24px;
+    }
+
+    .card-type-img.classic {
+      background: linear-gradient(135deg, #78909c, #546e7a);
+      color: #fff;
+    }
+
+    .card-type-img.gold {
+      background: linear-gradient(135deg, #ffd54f, #ff8f00);
+      color: #5d4037;
+    }
+
+    .card-type-img.platinum {
+      background: linear-gradient(135deg, #b0bec5, #78909c);
+      color: #263238;
+    }
+
+    .card-type-img .card-type-img-img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .radio-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .document-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      background-color: #fafafa;
+      font-size: 13px;
+    }
+
+    .document-block i {
+      color: var(--primary-dark);
+      font-size: 18px;
+    }
+
+    .photo-preview-img {
+      max-width: 200px;
+      max-height: 180px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+    }
+
+    .contract-text {
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      background-color: #fafafa;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .summary-table td {
+      border: 1px solid var(--border-soft);
+      padding: 3px 6px;
+    }
+
+    .summary-table td:first-child {
+      width: 38%;
+      background-color: #fafafa;
+      font-weight: 500;
+    }
+
+    .wizard-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    /* Modal (SMS, request details, confirmation) */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 220;
+    }
+
+    .modal {
+      background-color: #ffffff;
+      border-radius: 14px;
+      padding: 14px 16px 12px;
+      max-width: 380px;
+      width: calc(100% - 40px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      font-size: 13px;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* Custom confirm */
+    .confirm-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 1024px) {
+      .columns-main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .top-bar {
+        padding-inline: 10px;
+      }
+      .sticky-info {
+        padding-inline: 10px;
+      }
+      .app-main {
+        padding-inline: 10px;
+      }
+      .wizard-layout {
+        grid-template-columns: 1fr;
+      }
+      .operations-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="tab-bar" id="tab-bar">
+        <!-- Tabs rendered by JS -->
+      </div>
+      <div class="session-indicator">
+        <button class="btn secondary" id="session-btn">
+          <i class="fa-solid fa-play"></i> Начать сессию
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky info bar -->
+  <div class="sticky-info">
+    <div class="sticky-inner">
+      <div class="client-fio" id="client-fio">Иванов Иван Иванович</div>
+      <div class="client-avatar">
+        <div class="client-circle">M</div>
+        <span>47 лет</span>
+      </div>
+      <div class="sticky-blocks">
+        <div class="sticky-item" data-info="client">
+          <span class="sticky-item-label">Информация о клиенте</span>
+          <div class="dropdown" id="dropdown-client"></div>
+        </div>
+        <div class="sticky-item" data-info="portfolio">
+          <span class="sticky-item-label">Портфель</span>
+          <div class="dropdown" id="dropdown-portfolio"></div>
+        </div>
+        <div class="sticky-item" data-info="transactions">
+          <span class="sticky-item-label">Последние транзакции</span>
+          <div class="dropdown" id="dropdown-transactions"></div>
+        </div>
+        <div class="sticky-item" data-info="cases">
+          <span class="sticky-item-label">Обращения и коммуникации</span>
+          <div class="dropdown" id="dropdown-cases"></div>
+        </div>
+        <div class="sticky-item" data-info="sms">
+          <span class="sticky-item-label">SMS и уведомления</span>
+          <div class="dropdown" id="dropdown-sms"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <main class="app-main">
+    <!-- Content of active tab -->
+    <div id="tab-content-host"></div>
+  </main>
+
+  <!-- Generic modal for SMS and request details -->
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal" id="modal">
+      <div class="modal-title" id="modal-title"></div>
+      <div id="modal-body"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- Custom confirmation modal -->
+  <div class="modal-backdrop" id="confirm-backdrop">
+    <div class="modal">
+      <div class="modal-title" id="confirm-title">
+        <i class="fa-solid fa-question-circle"></i> Подтверждение
+      </div>
+      <div id="confirm-message"></div>
+      <div class="confirm-buttons">
+        <button class="btn secondary" id="confirm-no">Нет</button>
+        <button class="btn" id="confirm-yes">Да</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SMS Session Modal -->
+  <div class="modal-backdrop" id="sms-backdrop">
+    <div class="modal">
+      <div class="modal-title">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Подтверждение сессии</span>
+      </div>
+      <div id="sms-body">
+        Для выполнения операций необходимо подтвердить сессию. Введите SMS-код,
+        отправленный клиенту.
+        <div class="form-group" style="margin-top:8px;">
+          <label class="form-label">SMS-код (4 цифры)</label>
+          <input
+            type="text"
+            maxlength="4"
+            class="form-control"
+            id="sms-code-input"
+            autocomplete="one-time-code"
+          />
+          <div class="form-error" id="sms-error" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="sms-cancel">Отмена</button>
+        <button class="btn" id="sms-confirm">Подтвердить</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------------- DATA ----------------
+
+    const CLIENT_SHORT_NAME = "Иванов И.И.";
+
+    const clientInfoDropdown = [
+      { icon: "fa-id-card", text: "Паспорт: 52 60 378175" },
+      { icon: "fa-building-columns", text: "Выдан: ОТДЕЛОМ ВНУТРЕННИХ ДЕЛ ОКТЯБРСКОГО ОКРУГА ГОРОДА АРХАНГЕЛЬСКА" },
+      { icon: "fa-calendar", text: "Дата выдачи: 05.09.2024" },
+      { icon: "fa-hashtag", text: "Код подразделения: 292-000" },
+      { icon: "fa-user", text: "ФИО: Иванов Иван Иванович" },
+      { icon: "fa-phone", text: "Телефон: +7 (999) 123-45-67" },
+      { icon: "fa-envelope", text: "Email: ivanov@example.com" },
+    ];
+
+    const clientInfoFull = {
+      fio: "Иванов Иван Иванович",
+      age: "47 лет",
+      gender: "мужской",
+      passportSeries: "52 60",
+      passportNumber: "378175",
+      passportIssueDate: "05.09.2024",
+      passportIssuer: "ОТДЕЛОМ ВНУТРЕННИХ ДЕЛ ОКТЯБРСКОГО ОКРУГА ГОРОДА АРХАНГЕЛЬСКА",
+      passportDeptCode: "292-000",
+      snils: "123-456-789 01",
+      inn: "770112345678",
+      residence: "г. Москва, ул. Ленина, д. 10, кв. 45",
+      registration: "г. Архангельск, ул. Поморская, д. 5, кв. 12",
+      phone: "+7 (999) 123-45-67",
+      email: "ivanov@example.com",
+    };
+
+    const portfolioDropdown = [
+      { icon: "fa-credit-card", text: "Alfa Only: 1052 6753 0601 254 (выпуск 15.01.2024, активна)" },
+      { icon: "fa-credit-card", text: "Кредитная карта: 1895 7678 4138 552 (лимит 1 000 000 ₽, задолженность 0 ₽)" },
+    ];
+
+    const portfolioFull = {
+      alfaOnly: {
+        number: "1052 6753 0601 254",
+        expiry: "01/28",
+        system: "Мир",
+        issueDate: "15.01.2024",
+        status: "активна",
+      },
+      creditCard: {
+        number: "1895 7678 4138 552",
+        limit: "1 000 000 ₽",
+        rate: "20%",
+        issueDate: "10.03.2024",
+        debt: "0 ₽",
+        available: "1 000 000 ₽",
+        status: "активна",
+      },
+    };
+
+    // Транзакции: дата, карта (полный номер для выпадающего списка), сумма
+    const transactionsDropdown = [
+      { date: "24.02", card: "1052 6753 0601 1254", amount: "+550 ₽" },
+      { date: "24.02", card: "1052 6753 0601 1254", amount: "-1 200 ₽" },
+      { date: "23.02", card: "1895 7678 4138 1385", amount: "-3 500 ₽" },
+      { date: "23.02", card: "1895 7678 4138 1385", amount: "+2 300 ₽" },
+      { date: "22.02", card: "1895 7678 4138 5520", amount: "-850 ₽" },
+      { date: "22.02", card: "1895 7678 4138 5520", amount: "+1 500 ₽" },
+      { date: "21.02", card: "1052 6753 0601 1254", amount: "-2 100 ₽" },
+      { date: "21.02", card: "1052 6753 0601 1254", amount: "+3 200 ₽" },
+    ];
+
+    const transactionsFull = [
+      { date: "24.02.2026", time: "14:23", account: "40817810099910001234", card: "1052 6753 0601 1254", amount: "+550 ₽", desc: "SPORTKORT" },
+      { date: "24.02.2026", time: "10:15", account: "40817810099910001234", card: "1052 6753 0601 1254", amount: "-1 200 ₽", desc: "KFC" },
+      { date: "23.02.2026", time: "18:40", account: "40817810099910005678", card: "1895 7678 4138 1385", amount: "-3 500 ₽", desc: "Перевод" },
+      { date: "23.02.2026", time: "09:30", account: "40817810099910005678", card: "1895 7678 4138 1385", amount: "+2 300 ₽", desc: "Возврат" },
+      { date: "22.02.2026", time: "11:30", account: "40817810099910009999", card: "1895 7678 4138 5520", amount: "-850 ₽", desc: "АЗС" },
+      { date: "22.02.2026", time: "16:20", account: "40817810099910009999", card: "1895 7678 4138 5520", amount: "+1 500 ₽", desc: "Кешбэк" },
+      { date: "21.02.2026", time: "19:50", account: "40817810099910001234", card: "1052 6753 0601 1254", amount: "-2 100 ₽", desc: "Ресторан" },
+      { date: "21.02.2026", time: "13:35", account: "40817810099910001234", card: "1052 6753 0601 1254", amount: "+3 200 ₽", desc: "Зачисление" },
+      { date: "20.02.2026", time: "10:25", account: "40817810099910005678", card: "1895 7678 4138 1385", amount: "-4 200 ₽", desc: "ЖКХ" },
+      { date: "20.02.2026", time: "22:15", account: "40817810099910005678", card: "1895 7678 4138 1385", amount: "-1 800 ₽", desc: "Такси" },
+    ];
+
+    const casesDropdown = [
+      { icon: "fa-folder-open", text: "Открытие дебетовой карты, 12.01, оформить" },
+      { icon: "fa-folder-open", text: "Получение кредита, 28.12, отклонено" },
+      { icon: "fa-folder-open", text: "Закрытие счета, 05.02, в обработке" },
+      { icon: "fa-folder-open", text: "Перевыпуск карты, 01.03, выполнено" },
+      { icon: "fa-folder-open", text: "Изменение лимита, 10.02, одобрено" },
+    ];
+
+    const casesFull = [
+      {
+        title: "Заявка на открытие дебетовой карты",
+        date: "12.01.2026",
+        status: "оформить",
+        place: "отделение «Центральный»",
+        manager: "Петрова А.С.",
+        extra: "Желаемое место получения: отделение «Центральный»",
+        source: "Отделение",
+      },
+      {
+        title: "Заявка на получение кредита",
+        date: "28.12.2025",
+        status: "отклонено",
+        place: "",
+        manager: "Сидоров И.П.",
+        extra: "причина: недостаточный доход",
+        source: "Мобильное приложение",
+      },
+      {
+        title: "Заявка на закрытие счета",
+        date: "05.02.2026",
+        status: "в обработке",
+        place: "",
+        manager: "Иванова Е.А.",
+        extra: "",
+        source: "Отделение",
+      },
+      {
+        title: "Заявка на перевыпуск карты",
+        date: "01.03.2026",
+        status: "выполнено",
+        place: "отделение «Северный»",
+        manager: "Васильев Д.Д.",
+        extra: "",
+        source: "Мобильное приложение",
+      },
+      {
+        title: "Заявка на изменение лимита",
+        date: "10.02.2026",
+        status: "одобрено",
+        place: "",
+        manager: "Петрова А.С.",
+        extra: "новый лимит: 1 500 000 ₽",
+        source: "Отделение",
+      },
+      {
+        title: "Заявка на открытие вклада",
+        date: "15.03.2026",
+        status: "оформить",
+        place: "отделение «Южный»",
+        manager: "",
+        extra: "Желаемое отделение: «Южный»",
+        source: "Мобильное приложение",
+      },
+      {
+        title: "Заявка на подключение SMS-информирования",
+        date: "20.01.2026",
+        status: "выполнено",
+        place: "",
+        manager: "Сидоров И.П.",
+        extra: "",
+        source: "Отделение",
+      },
+      {
+        title: "Заявка на блокировку карты",
+        date: "05.03.2026",
+        status: "в обработке",
+        place: "",
+        manager: "Васильев Д.Д.",
+        extra: "",
+        source: "Мобильное приложение",
+      },
+      {
+        title: "Заявка на смену тарифа",
+        date: "12.02.2026",
+        status: "одобрено",
+        place: "",
+        manager: "",
+        extra: "",
+        source: "Отделение",
+      },
+      {
+        title: "Заявка на восстановление доступа",
+        date: "28.02.2026",
+        status: "выполнено",
+        place: "",
+        manager: "",
+        extra: "",
+        source: "Мобильное приложение",
+      },
+    ];
+
+    const smsDropdown = [
+      { date: "24.02.2026", text: "Покупка *1254: 550 ₽ в SPORTKORT. Баланс: 5805.35 ₽", type: "sms" },
+      { date: "23.02.2026", text: "Зачисление зарплаты: 45 000 ₽. Баланс: 6355.35 ₽", type: "notification" },
+      { date: "21.02.2026", text: "Оплата мобильной связи: 300 ₽, МТС. Баланс: 5805.35 ₽", type: "notification" },
+      { date: "20.02.2026", text: "Покупка *9876: 1 200 ₽ в KFC. Баланс: 6105.35 ₽", type: "sms" },
+      { date: "19.02.2026", text: "Покупка *1254: 2 300 ₽ в Пятёрочка. Баланс: 8505.35 ₽", type: "sms" },
+    ];
+
+    const smsFull = [
+      { date: "24.02.2026", text: "Покупка *1254: 550 ₽ в SPORTKORT. Баланс: 5805.35 ₽", type: "sms" },
+      { date: "23.02.2026", text: "Зачисление зарплаты: 45 000 ₽. Баланс: 6355.35 ₽", type: "notification" },
+      { date: "21.02.2026", text: "Оплата мобильной связи: 300 ₽, МТС. Баланс: 5805.35 ₽", type: "notification" },
+      { date: "20.02.2026", text: "Покупка *9876: 1 200 ₽ в KFC. Баланс: 6105.35 ₽", type: "sms" },
+      { date: "19.02.2026", text: "Покупка *1254: 2 300 ₽ в Пятёрочка. Баланс: 8505.35 ₽", type: "sms" },
+      { date: "18.02.2026", text: "Снятие наличных 5 000 ₽, банкомат. Баланс: 10 805.35 ₽", type: "notification" },
+      { date: "17.02.2026", text: "Покупка *1385: 3 200 ₽ в Лента. Баланс: 15 805.35 ₽", type: "sms" },
+      { date: "16.02.2026", text: "Зачисление кешбэка 150 ₽. Баланс: 19 005.35 ₽", type: "notification" },
+      { date: "15.02.2026", text: "Покупка *1254: 1 800 ₽ в McDonalds. Баланс: 18 855.35 ₽", type: "sms" },
+      { date: "13.02.2026", text: "Покупка *5520: 850 ₽ в АЗС. Баланс: 17 055.35 ₽", type: "sms" },
+      { date: "12.02.2026", text: "Покупка *1254: 4 200 ₽ в М.Видео. Баланс: 16 205.35 ₽", type: "sms" },
+      { date: "11.02.2026", text: "Зачисление зарплаты: 45 000 ₽. Баланс: 20 405.35 ₽", type: "notification" },
+      { date: "10.02.2026", text: "Покупка *1385: 1 500 ₽ в Аптека. Баланс: -25 994.65 ₽ (перерасход)", type: "sms" },
+      { date: "09.02.2026", text: "Оплата ЖКХ: 3 200 ₽. Баланс: 18 505.35 ₽", type: "notification" },
+      { date: "08.02.2026", text: "Покупка *1254: 650 ₽ в Кафе. Баланс: 21 705.35 ₽", type: "sms" },
+    ];
+
+    const operationsSales = [
+      "Кредиты",
+      "Карты",
+      "Инвестиции",
+      "Страховые продукты",
+      "Депозиты",
+      "Реферальная программа",
+      "Программа лояльности «Cashback»",
+      "Подписка Альфа-смарт",
+      "Самозанятость",
+    ];
+
+    const operationsService = [
+      "Счета",
+      "ИБС",
+      "Изменение персональных данных",
+      "Пакет услуг",
+      "Справки и выписки",
+      "УКД",
+      "Доверенности",
+      "Заявления",
+      "Заказ наличных",
+      "Сбор биометрики",
+      "Лимиты",
+      "Операции в УКД",
+      "Регулярные зачисления",
+      "Мобильная связь",
+      "Удаленное подписание документов",
+      "Годовая комиссия А-Клуб",
+    ];
+
+    const operationDescriptions = {
+      "Кредиты": "Оформление кредита",
+      "Карты": "Выпуск карт",
+      "Инвестиции": "Инвестиционные продукты",
+      "Страховые продукты": "Страхование",
+      "Депозиты": "Вклады и счета",
+      "Реферальная программа": "Привлечение рефералов",
+      "Программа лояльности «Cashback»": "Кешбэк и бонусы",
+      "Подписка Альфа-смарт": "Подписка на сервисы",
+      "Самозанятость": "Услуги для самозанятых",
+      "Счета": "Открытие и ведение счетов",
+      "ИБС": "Интернет-банк для бизнеса",
+      "Изменение персональных данных": "Смена данных клиента",
+      "Пакет услуг": "Подключение пакетов",
+      "Справки и выписки": "Документы по счёту",
+      "УКД": "Удалённое кассовое обслуживание",
+      "Доверенности": "Оформление доверенностей",
+      "Заявления": "Приём заявлений",
+      "Заказ наличных": "Заказ валюты и наличных",
+      "Сбор биометрики": "Биометрические данные",
+      "Лимиты": "Установка лимитов",
+      "Операции в УКД": "Проведение операций УКД",
+      "Регулярные зачисления": "Настройка автоплатежей",
+      "Мобильная связь": "Оплата связи",
+      "Удаленное подписание документов": "Электронная подпись",
+      "Годовая комиссия А-Клуб": "Комиссия А-Клуб",
+    };
+
+    const openRequestsData = [
+      {
+        id: 1,
+        title: "Заявка на открытие дебетовой карты",
+        date: "12.01.2026",
+        status: "оформить",
+        place: "отделение «Центральный»",
+        manager: "Петрова А.С.",
+        extra: "Желаемое место получения: отделение «Центральный»",
+        source: "Отделение",
+      },
+      {
+        id: 6,
+        title: "Заявка на открытие вклада",
+        date: "15.03.2026",
+        status: "оформить",
+        place: "отделение «Южный»",
+        manager: "—",
+        extra: "Желаемое отделение: «Южный»",
+        source: "Мобильное приложение",
+      },
+    ];
+
+    const simpleStepsPresets = {
+      "Кредиты": [
+        "Выбор типа кредита",
+        "Сумма и срок",
+        "Проверка кредитной истории",
+        "Подготовка договора",
+      ],
+      "Инвестиции": [
+        "Определение профиля риска",
+        "Выбор инвестиционного продукта",
+        "Подписание документов",
+      ],
+      "Страховые продукты": [
+        "Определение страхового покрытия",
+        "Расчет страховой премии",
+        "Выбор страховой программы",
+        "Подготовка полиса",
+      ],
+      "Депозиты": [
+        "Выбор вида вклада",
+        "Определение суммы и срока",
+        "Формирование договора",
+      ],
+      "Реферальная программа": [
+        "Проверка условий участия",
+        "Регистрация рефералов",
+        "Подтверждение участия",
+      ],
+      "Программа лояльности «Cashback»": [
+        "Проверка уровня клиента",
+        "Выбор категории повышенного кешбэка",
+        "Подтверждение подключения",
+      ],
+      "Подписка Альфа-смарт": [
+        "Подбор подходящего тарифа",
+        "Проверка совместимости продуктов",
+        "Подключение подписки",
+      ],
+      "Самозанятость": [
+        "Проверка статуса клиента",
+        "Выбор продукта для самозанятых",
+        "Регистрация в ФНС",
+      ],
+      "Счета": [
+        "Выбор типа счета",
+        "Проверка данных клиента",
+        "Подписание договора",
+      ],
+      "ИБС": [
+        "Проверка доступа",
+        "Назначение логина",
+        "Отправка инструкций клиенту",
+      ],
+      "Изменение персональных данных": [
+        "Проверка документа клиента",
+        "Внесение изменений",
+        "Подтверждение изменений",
+      ],
+      "Пакет услуг": [
+        "Выбор пакета",
+        "Проверка доступных продуктов",
+        "Подключение пакета",
+      ],
+      "Справки и выписки": [
+        "Выбор типа справки",
+        "Формирование документа",
+        "Передача клиенту",
+      ],
+      "УКД": [
+        "Выбор операции",
+        "Проверка реквизитов",
+        "Подтверждение операции",
+      ],
+      "Доверенности": [
+        "Проверка полномочий клиента",
+        "Формирование доверенности",
+        "Подписание",
+      ],
+      "Заявления": [
+        "Выбор типа заявления",
+        "Заполнение обязательных полей",
+        "Регистрация заявления",
+      ],
+      "Заказ наличных": [
+        "Выбор отделения",
+        "Выбор суммы и валюты",
+        "Подтверждение заказа",
+      ],
+      "Сбор биометрики": [
+        "Проверка согласия клиента",
+        "Сканирование биометрии",
+        "Отправка в хранилище",
+      ],
+      "Лимиты": [
+        "Проверка текущих лимитов",
+        "Изменение лимитов",
+        "Подтверждение операции",
+      ],
+      "Операции в УКД": [
+        "Выбор операции",
+        "Проверка реквизитов",
+        "Проведение",
+      ],
+      "Регулярные зачисления": [
+        "Выбор источника",
+        "Настройка расписания",
+        "Подтверждение",
+      ],
+      "Мобильная связь": [
+        "Выбор оператора",
+        "Проверка номера",
+        "Оплата и подтверждение",
+      ],
+      "Удаленное подписание документов": [
+        "Выбор документа",
+        "Отправка на подпись",
+        "Получение результата",
+      ],
+      "Годовая комиссия А-Клуб": [
+        "Проверка статуса клиента",
+        "Расчет комиссии",
+        "Подтверждение списания",
+      ],
+    };
+
+    // ---------------- STATE ----------------
+
+    const state = {
+      sessionActive: false,
+      tabs: [],
+      activeTabId: null,
+      nextTabId: 1,
+      cardWizard: null,
+      cardWizardFinished: false,
+      /** Сохранённый прогресс мастера «Карты» после «Сохранить прогресс» */
+      savedCardWizard: null,
+    };
+
+    // ---------------- CUSTOM CONFIRM ----------------
+
+    function showConfirm(message, onYes, onNo) {
+      const backdrop = document.getElementById('confirm-backdrop');
+      const msgEl = document.getElementById('confirm-message');
+      msgEl.textContent = message;
+      backdrop.style.display = 'flex';
+
+      const yesBtn = document.getElementById('confirm-yes');
+      const noBtn = document.getElementById('confirm-no');
+
+      const handleYes = () => {
+        backdrop.style.display = 'none';
+        yesBtn.removeEventListener('click', handleYes);
+        noBtn.removeEventListener('click', handleNo);
+        if (onYes) onYes();
+      };
+
+      const handleNo = () => {
+        backdrop.style.display = 'none';
+        yesBtn.removeEventListener('click', handleYes);
+        noBtn.removeEventListener('click', handleNo);
+        if (onNo) onNo();
+      };
+
+      yesBtn.addEventListener('click', handleYes);
+      noBtn.addEventListener('click', handleNo);
+    }
+
+    function showAlert(message, callback) {
+      const backdrop = document.getElementById('modal-backdrop');
+      const titleEl = document.getElementById('modal-title');
+      const bodyEl = document.getElementById('modal-body');
+      const actionsEl = document.getElementById('modal-actions');
+      titleEl.innerHTML = `<i class="fa-solid fa-info-circle"></i> Внимание`;
+      bodyEl.innerHTML = `<p>${message}</p>`;
+      actionsEl.innerHTML = '';
+      const btn = document.createElement('button');
+      btn.className = 'btn secondary';
+      btn.textContent = 'OK';
+      btn.addEventListener('click', () => {
+        backdrop.style.display = 'none';
+        if (callback) callback();
+      });
+      actionsEl.appendChild(btn);
+      backdrop.style.display = 'flex';
+    }
+
+    // ---------------- HELPERS ----------------
+
+    const qs = (sel) => document.querySelector(sel);
+    const qsa = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function findTabByType(type, key) {
+      if (type === 'info') return state.tabs.find(t => t.type === 'info' && t.payload.infoType === key);
+      if (type === 'operation') return state.tabs.find(t => t.type === 'operation' && t.payload.operationName === key);
+      return null;
+    }
+
+    function createTab(title, type, payload = {}) {
+      // если такая вкладка уже существует, просто активируем её
+      const existing = findTabByType(type, type === 'info' ? payload.infoType : payload.operationName);
+      if (existing) {
+        setActiveTab(existing.id);
+        return existing;
+      }
+      const tab = {
+        id: `tab-${state.nextTabId++}`,
+        title,
+        type,
+        payload,
+      };
+      state.tabs.push(tab);
+      state.activeTabId = tab.id;
+      renderTabs();
+      renderActiveTabContent();
+      return tab;
+    }
+
+    function setActiveTab(id) {
+      state.activeTabId = id;
+      renderTabs();
+      renderActiveTabContent();
+    }
+
+    function closeTab(id, options = {}) {
+      const tab = state.tabs.find((t) => t.id === id);
+      if (!tab) return;
+
+      const idx = state.tabs.findIndex((t) => t.id === id);
+      state.tabs.splice(idx, 1);
+      
+      // Если закрыли активную вкладку, переключаемся на главную
+      if (state.activeTabId === id) {
+        const mainTab = state.tabs.find(t => t.type === 'main');
+        state.activeTabId = mainTab ? mainTab.id : (state.tabs.length ? state.tabs[0].id : null);
+      }
+      
+      renderTabs();
+      renderActiveTabContent();
+    }
+
+    function ensureMainTab() {
+      if (!state.tabs.some((t) => t.type === "main")) {
+        const mainTab = {
+          id: "tab-main",
+          title: "Главная",
+          type: "main",
+          payload: {},
+        };
+        state.tabs.unshift(mainTab);
+        state.activeTabId = mainTab.id;
+      }
+    }
+
+    // ---------------- DROPDOWNS ----------------
+
+    function renderDropdowns() {
+      const dropdownClient = qs("#dropdown-client");
+      dropdownClient.innerHTML =
+        clientInfoDropdown
+          .map((item) => `<div class="dropdown-line"><i class="fa-solid ${item.icon}"></i><span>${item.text}</span></div>`)
+          .join("") +
+        `<div class="dropdown-more"><a data-open-info="client">…</a></div>`;
+
+      const dropdownPortfolio = qs("#dropdown-portfolio");
+      dropdownPortfolio.innerHTML =
+        portfolioDropdown
+          .map((item) => `<div class="dropdown-line"><i class="fa-solid ${item.icon}"></i><span>${item.text}</span></div>`)
+          .join("") +
+        `<div class="dropdown-more"><a data-open-info="portfolio">…</a></div>`;
+
+      const dropdownTransactions = qs("#dropdown-transactions");
+      const byDate = {};
+      transactionsDropdown.forEach((t) => {
+        if (!byDate[t.date]) byDate[t.date] = [];
+        byDate[t.date].push(t);
+      });
+      const datesOrder = [...new Set(transactionsDropdown.map((t) => t.date))];
+      dropdownTransactions.innerHTML =
+        datesOrder
+          .map((date) => {
+            const items = byDate[date];
+            return `
+              <div class="dropdown-transaction-group">
+                <div class="transaction-date">${date}</div>
+                ${items.map((t) => {
+                  const amountClass = t.amount.startsWith('+') ? 'amount-positive' : 'amount-negative';
+                  return `<div class="transaction-detail">
+                    <span class="detail-card">${t.card}</span>
+                    <span class="detail-amount ${amountClass}">${t.amount}</span>
+                  </div>`;
+                }).join("")}
+              </div>`;
+          })
+          .join("") +
+        `<div class="dropdown-more"><a data-open-info="transactions">…</a></div>`;
+
+      const dropdownCases = qs("#dropdown-cases");
+      dropdownCases.innerHTML =
+        casesDropdown
+          .map((item) => `<div class="dropdown-line"><i class="fa-solid ${item.icon}"></i><span>${item.text}</span></div>`)
+          .join("") +
+        `<div class="dropdown-more"><a data-open-info="cases">…</a></div>`;
+
+      const dropdownSms = qs("#dropdown-sms");
+      dropdownSms.innerHTML =
+        smsDropdown
+          .map(
+            (s) =>
+              `<div class="dropdown-line"><i class="fa-solid ${
+                s.type === "sms" ? "fa-sms" : "fa-bell"
+              }"></i><span>${s.date} – ${s.text}</span></div>`
+          )
+          .join("") +
+        `<div class="dropdown-more"><a data-open-info="sms">…</a></div>`;
+
+      // Attach handlers for "..."
+      qsa('[data-open-info="client"]').forEach((el) =>
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoTab("Информация о клиенте", "client");
+          closeAllDropdowns();
+        }),
+      );
+      qsa('[data-open-info="portfolio"]').forEach((el) =>
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoTab("Портфель", "portfolio");
+          closeAllDropdowns();
+        }),
+      );
+      qsa('[data-open-info="transactions"]').forEach((el) =>
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoTab("Последние транзакции", "transactions");
+          closeAllDropdowns();
+        }),
+      );
+      qsa('[data-open-info="cases"]').forEach((el) =>
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoTab("Обращения и коммуникации", "cases");
+          closeAllDropdowns();
+        }),
+      );
+      qsa('[data-open-info="sms"]').forEach((el) =>
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openInfoTab("SMS и уведомления", "sms");
+          closeAllDropdowns();
+        }),
+      );
+    }
+
+    function closeAllDropdowns() {
+      qsa(".dropdown").forEach((d) => d.classList.remove("open"));
+    }
+
+    function initDropdownClicks() {
+      qsa(".sticky-item").forEach((item) => {
+        item.addEventListener("click", (e) => {
+          const dropdown = item.querySelector(".dropdown");
+          const isOpen = dropdown.classList.contains("open");
+          closeAllDropdowns();
+          if (!isOpen) {
+            dropdown.classList.add("open");
+          }
+          e.stopPropagation();
+        });
+      });
+      document.addEventListener("click", () => {
+        closeAllDropdowns();
+      });
+    }
+
+    // ---------------- TABS RENDERING ----------------
+
+    function renderTabs() {
+      const bar = qs("#tab-bar");
+      bar.innerHTML = "";
+      ensureMainTab();
+      state.tabs.forEach((tab) => {
+        const div = document.createElement("div");
+        div.className = "tab";
+        if (tab.type === "main") div.classList.add("tab-main");
+        if (tab.id === state.activeTabId) div.classList.add("active");
+
+        const icon =
+          tab.type === "main"
+            ? '<i class="fa-solid fa-house"></i>'
+            : tab.type === "info"
+            ? '<i class="fa-solid fa-circle-info"></i>'
+            : '<i class="fa-solid fa-credit-card"></i>';
+
+        div.innerHTML = `${icon}<span>${tab.title}</span>`;
+        if (tab.type !== "main") {
+          const btn = document.createElement("button");
+          btn.className = "tab-close-btn";
+          btn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeTabWithConfirm(tab);
+          });
+          div.appendChild(btn);
+        }
+        div.addEventListener("click", () => setActiveTab(tab.id));
+        bar.appendChild(div);
+      });
+    }
+
+    function closeTabWithConfirm(tab) {
+      // Для любой операционной вкладки показываем «Сохранить прогресс?»
+      if (tab.type === "operation") {
+        showConfirm(
+          "Сохранить прогресс?",
+          () => {
+            // Да – для карты сохраняем копию прогресса; для остальных просто закрываем
+            if (tab.payload.operationName === "Карты" && !state.cardWizardFinished) {
+              state.savedCardWizard = JSON.parse(JSON.stringify(state.cardWizard));
+            }
+            closeTab(tab.id);
+          },
+          () => {
+            // Нет – закрываем и при необходимости сбрасываем данные операции (карта)
+            if (tab.payload.operationName === "Карты") {
+              state.cardWizard = null;
+              state.cardWizardFinished = false;
+              state.savedCardWizard = null;
+            }
+            closeTab(tab.id);
+          }
+        );
+      } else {
+        closeTab(tab.id);
+      }
+    }
+
+    // ---------------- TAB CONTENT ----------------
+
+    function renderActiveTabContent() {
+      const host = qs("#tab-content-host");
+      const tab = state.tabs.find((t) => t.id === state.activeTabId);
+      if (!tab) {
+        host.innerHTML = "";
+        return;
+      }
+      if (tab.type === "main") {
+        host.innerHTML = renderMainTabHTML();
+        initMainTabInteractions();
+      } else if (tab.type === "info") {
+        host.innerHTML = renderInfoTabHTML(tab.payload.infoType);
+      } else if (tab.type === "operation") {
+        if (tab.payload.operationName === "Карты") {
+          host.innerHTML = renderCardOperationHTML();
+          initCardWizardHandlers();
+        } else {
+          host.innerHTML = renderSimpleOperationHTML(tab.payload.operationName);
+        }
+      }
+    }
+
+    // ---------------- MAIN TAB ----------------
+
+    function renderMainTabHTML() {
+      return `
+        <div class="columns-main">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">
+                  <i class="fa-solid fa-lightbulb"></i>
+                  Рекомендованные операции
+                </div>
+                <div class="card-subtitle">На основе профиля клиента</div>
+              </div>
+            </div>
+            <div class="recommended-list" id="recommended-list"></div>
+
+            <div class="search-row">
+              <div class="search-container">
+                <i class="fa-solid fa-search search-icon-left"></i>
+                <input
+                  type="text"
+                  class="search-input"
+                  id="operation-search"
+                  placeholder="Поиск по названию операции"
+                />
+              </div>
+            </div>
+
+            <div class="operations-columns">
+              <div class="operations-column">
+                <div class="operations-column-title">
+                  <i class="fa-solid fa-chart-line"></i> Продажные
+                </div>
+                <div class="operations-grid" id="ops-sales"></div>
+              </div>
+              <div class="operations-column">
+                <div class="operations-column-title">
+                  <i class="fa-solid fa-wrench"></i> Сервисные
+                </div>
+                <div class="operations-grid" id="ops-service"></div>
+              </div>
+            </div>
+
+            <div class="tab-content-wrapper" id="main-tab-extra"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">
+                  <i class="fa-solid fa-folder-open"></i>
+                  Открытые обращения
+                </div>
+                <div class="card-subtitle">
+                  Текущие запросы клиента
+                </div>
+              </div>
+            </div>
+            <ul class="requests-list" id="requests-list"></ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function initMainTabInteractions() {
+      // recommended
+      const recommendedContainer = qs("#recommended-list");
+      const recommended = [
+        "Оформление брокерского счета",
+        "Заказ наличных",
+      ];
+      recommendedContainer.innerHTML = "";
+      recommended.forEach((name) => {
+        const card = document.createElement("div");
+        card.className = "recommended-card";
+        card.textContent = name;
+        card.addEventListener("click", () => handleOperationClick(name));
+        recommendedContainer.appendChild(card);
+      });
+
+      // search + operation tiles
+      const searchInput = qs("#operation-search");
+      function renderTiles() {
+        const q = (searchInput.value || "").trim().toLowerCase();
+        const salesHost = qs("#ops-sales");
+        const serviceHost = qs("#ops-service");
+        salesHost.innerHTML = "";
+        serviceHost.innerHTML = "";
+
+        const addTiles = (names, host) => {
+          names
+            .filter(
+              (n) => !q || n.toLowerCase().includes(q),
+            )
+            .forEach((name) => {
+              const tile = document.createElement("div");
+              tile.className = "operation-tile";
+              const desc = operationDescriptions[name] || "";
+              tile.innerHTML = desc
+                ? `<span>${name}</span><span class="operation-tile-desc">${desc}</span>`
+                : name;
+              tile.addEventListener("click", () => handleOperationClick(name));
+              host.appendChild(tile);
+            });
+        };
+        addTiles(operationsSales, salesHost);
+        addTiles(operationsService, serviceHost);
+      }
+      searchInput.addEventListener("input", renderTiles);
+      renderTiles();
+
+      // open requests
+      const reqList = qs("#requests-list");
+      reqList.innerHTML = "";
+      openRequestsData.forEach((r) => {
+        const li = document.createElement("li");
+        li.className = "request-item";
+
+        const statusClass =
+          r.status === "оформить"
+            ? "badge-success"
+            : r.status === "отклонено"
+            ? "badge-error"
+            : r.status === "в обработке"
+            ? "badge-warning"
+            : "badge-info";
+
+        li.innerHTML = `
+          <div class="request-icon">
+            <i class="fa-solid fa-inbox"></i>
+          </div>
+          <div class="request-content">
+            <div class="request-title">${r.title}</div>
+            <div class="request-meta">
+              <span class="request-date">${r.date}</span>
+              <span class="badge ${statusClass}">${r.status}</span>
+            </div>
+          </div>
+        `;
+        li.addEventListener("click", () => showRequestModal(r));
+        reqList.appendChild(li);
+      });
+    }
+
+    // open request modal
+    function showRequestModal(req) {
+      const backdrop = qs("#modal-backdrop");
+      const titleEl = qs("#modal-title");
+      const bodyEl = qs("#modal-body");
+      const actionsEl = qs("#modal-actions");
+      titleEl.innerHTML = `<i class="fa-solid fa-inbox"></i><span>${req.title}</span>`;
+      bodyEl.innerHTML = `
+        <div style="font-size:13px;">
+          <p><strong>Дата:</strong> ${req.date}</p>
+          <p><strong>Статус:</strong> ${req.status}</p>
+          <p><strong>Место оформления:</strong> ${req.place || '—'}</p>
+          <p><strong>Менеджер:</strong> ${req.manager || '—'}</p>
+          <p>${req.extra || ''}</p>
+        </div>
+      `;
+      actionsEl.innerHTML = "";
+      const btn = document.createElement("button");
+      btn.className = "btn secondary";
+      btn.textContent = "Закрыть";
+      btn.addEventListener("click", () => {
+        backdrop.style.display = "none";
+      });
+      actionsEl.appendChild(btn);
+      backdrop.style.display = "flex";
+    }
+
+    // ---------------- INFO TABS ----------------
+
+    function openInfoTab(title, infoType) {
+      createTab(title, "info", { infoType });
+    }
+
+    function renderInfoTabHTML(infoType) {
+      if (infoType === "client") {
+        const c = clientInfoFull;
+        return `
+          <div class="card">
+            <div class="info-title">
+              <i class="fa-solid fa-user"></i>
+              <span>Информация о клиенте</span>
+            </div>
+            <table class="info-table">
+              <tr><td>ФИО</td><td>${c.fio}</td></tr>
+              <tr><td>Возраст</td><td>${c.age}</td></tr>
+              <tr><td>Пол</td><td>${c.gender}</td></tr>
+              <tr><td colspan="2" style="background-color: #f0f0f0;"><strong>Паспортные данные</strong></td></tr>
+              <tr><td>Серия паспорта</td><td>${c.passportSeries}</td></tr>
+              <tr><td>Номер паспорта</td><td>${c.passportNumber}</td></tr>
+              <tr><td>Дата выдачи</td><td>${c.passportIssueDate}</td></tr>
+              <tr><td>Кем выдан</td><td>${c.passportIssuer}</td></tr>
+              <tr><td>Код подразделения</td><td>${c.passportDeptCode}</td></tr>
+              <tr><td colspan="2" style="background-color: #f0f0f0;"><strong>Дополнительная информация</strong></td></tr>
+              <tr><td>СНИЛС</td><td>${c.snils}</td></tr>
+              <tr><td>ИНН</td><td>${c.inn}</td></tr>
+              <tr><td>Место проживания</td><td>${c.residence}</td></tr>
+              <tr><td>Адрес регистрации</td><td>${c.registration}</td></tr>
+              <tr><td>Телефон</td><td>${c.phone}</td></tr>
+              <tr><td>Email</td><td>${c.email}</td></tr>
+            </table>
+          </div>
+        `;
+      }
+      if (infoType === "portfolio") {
+        const p = portfolioFull;
+        return `
+          <div class="card">
+            <div class="info-title">
+              <i class="fa-solid fa-wallet"></i>
+              <span>Портфель</span>
+            </div>
+            <div class="portfolio-section">
+              <strong>Alfa Only</strong>
+              <table class="info-table">
+                <tr><td>Номер</td><td>${p.alfaOnly.number}</td></tr>
+                <tr><td>Срок действия</td><td>${p.alfaOnly.expiry}</td></tr>
+                <tr><td>Платёжная система</td><td>${p.alfaOnly.system}</td></tr>
+                <tr><td>Дата выпуска</td><td>${p.alfaOnly.issueDate}</td></tr>
+                <tr><td>Статус</td><td>${p.alfaOnly.status}</td></tr>
+              </table>
+            </div>
+            <div class="portfolio-section">
+              <strong>Кредитная карта</strong>
+              <table class="info-table">
+                <tr><td>Номер</td><td>${p.creditCard.number}</td></tr>
+                <tr><td>Лимит</td><td>${p.creditCard.limit}</td></tr>
+                <tr><td>Процентная ставка</td><td>${p.creditCard.rate}</td></tr>
+                <tr><td>Дата выдачи</td><td>${p.creditCard.issueDate}</td></tr>
+                <tr><td>Задолженность</td><td>${p.creditCard.debt}</td></tr>
+                <tr><td>Доступный остаток</td><td>${p.creditCard.available}</td></tr>
+                <tr><td>Статус</td><td>${p.creditCard.status}</td></tr>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+      if (infoType === "transactions") {
+        return `
+          <div class="card">
+            <div class="info-title">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>Последние транзакции</span>
+            </div>
+            <table class="transactions-table">
+              <thead>
+                <tr><th>Дата</th><th>Время</th><th>Счёт</th><th>Карта</th><th>Сумма</th><th>Описание</th></tr>
+              </thead>
+              <tbody>
+                ${transactionsFull.map(t => `
+                  <tr>
+                    <td>${t.date}</td>
+                    <td>${t.time}</td>
+                    <td>${t.account}</td>
+                    <td>${t.card}</td>
+                    <td style="color: ${t.amount.startsWith('+') ? '#2e7d32' : '#d32f2f'}">${t.amount}</td>
+                    <td>${t.desc}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      if (infoType === "cases") {
+        return `
+          <div class="card">
+            <div class="info-title">
+              <i class="fa-solid fa-comments"></i>
+              <span>Обращения и коммуникации</span>
+            </div>
+            <table class="transactions-table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Дата</th>
+                  <th>Статус</th>
+                  <th>Менеджер</th>
+                  <th>Место заявки</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${casesFull.map(c => `
+                  <tr>
+                    <td>${c.title}</td>
+                    <td>${c.date}</td>
+                    <td><span class="badge ${c.status === 'оформить' ? 'badge-success' : c.status === 'отклонено' ? 'badge-error' : c.status === 'в обработке' ? 'badge-warning' : 'badge-info'}">${c.status}</span></td>
+                    <td>${c.manager || '—'}</td>
+                    <td>${c.source || '—'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      if (infoType === "sms") {
+        return `
+          <div class="card">
+            <div class="info-title">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+              <span>SMS и уведомления</span>
+            </div>
+            <table class="sms-table">
+              <thead><tr><th>Дата</th><th>Тип</th><th>Сообщение</th></tr></thead>
+              <tbody>
+                ${smsFull.map(s => `
+                  <tr>
+                    <td>${s.date}</td>
+                    <td><i class="fa-solid ${s.type === 'sms' ? 'fa-sms' : 'fa-bell'}"></i></td>
+                    <td>${s.text}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+      return "";
+    }
+
+    // ---------------- OPERATION HANDLING ----------------
+
+    function handleOperationClick(name) {
+      // Проверка: если уже открыта какая-либо операционная вкладка
+      const existingOpTab = state.tabs.find(t => t.type === 'operation');
+      if (existingOpTab) {
+        // Если открыта та же самая операция – переключаемся на неё
+        if (existingOpTab.payload.operationName === name) {
+          setActiveTab(existingOpTab.id);
+          return;
+        } else {
+          // Иначе – предупреждение
+          showAlert(
+            "Сначала завершите текущую операцию или сохраните прогресс.",
+            null
+          );
+          return;
+        }
+      }
+
+      const openOperation = () => {
+        if (name === "Карты") {
+          // Восстанавливаем прогресс из сохранённого или создаём новый
+          if (state.savedCardWizard) {
+            state.cardWizard = JSON.parse(JSON.stringify(state.savedCardWizard));
+            state.cardWizardFinished = false;
+            state.savedCardWizard = null;
+          } else if (!state.cardWizard || state.cardWizardFinished) {
+            state.cardWizard = createCardWizardState();
+            state.cardWizardFinished = false;
+          }
+          createTab("Оформление кредитной карты", "operation", {
+            operationName: "Карты",
+          });
+        } else {
+          createTab(name, "operation", { operationName: name });
+        }
+      };
+
+      if (!state.sessionActive) {
+        pendingOperationAfterSms = name;
+        openSmsModal();
+      } else {
+        openOperation();
+      }
+    }
+
+    // ---------------- SIMPLE OPERATION TAB ----------------
+
+    function renderSimpleOperationHTML(name) {
+      const steps =
+        simpleStepsPresets[name] || [
+          "Подготовка данных клиента",
+          "Проверка параметров операции",
+          "Подтверждение выполнения",
+        ];
+      return `
+        <div class="card">
+          <div class="op-simple-title">${name}</div>
+          <ol class="op-simple-steps">
+            ${steps.map((s) => `<li>${s}</li>`).join("")}
+          </ol>
+        </div>
+      `;
+    }
+
+    // Ссылки на изображения карт для шага 3 мастера (подставьте свои URL)
+    const CARD_IMAGE_URLS = {
+      classic: "alpha_1.png",  // например: "images/card-classic.png"
+      gold: "alpha_2.png",     // например: "images/card-gold.png"
+      platinum: "alpha_3.png", // например: "images/card-platinum.png"
+    };
+
+    // Договор на шаге 7: URL файла договора (PDF и т.п.) или пусто — показывается только текст
+    const CREDIT_CARD_CONTRACT_FILE_URL = ""; // например: "docs/contract-credit-card.pdf"
+
+    function getContractText() {
+      const text = `ДОГОВОР ОБСЛУЖИВАНИЯ КРЕДИТНОЙ КАРТЫ
+
+1. ОБЩИЕ ПОЛОЖЕНИЯ
+1.1. Настоящий договор регулирует условия обслуживания кредитной карты Банка.
+1.2. Клиент обязуется соблюдать условия использования карты и своевременно вносить платежи.
+
+2. ЛИМИТ И СТАВКА
+2.1. Кредитный лимит устанавливается Банком в одностороннем порядке.
+2.2. Процентная ставка указывается в условиях продукта (от 19% до 25% годовых).
+
+3. ПОРЯДОК ПОГАШЕНИЯ
+3.1. Минимальный платёж — не менее 5% от суммы задолженности.
+3.2. Дата платежа — не позднее 25-го числа месяца, следующего за отчётным.
+
+4. ШТРАФЫ И ПЕНИ
+4.1. При просрочке начисляются пени в соответствии с тарифами Банка.
+
+5. ЗАКЛЮЧИТЕЛЬНЫЕ ПОЛОЖЕНИЯ
+5.1. Договор вступает в силу с момента подписания клиентом.`;
+      return text.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "\n");
+    }
+
+    // ---------------- CARD WIZARD STATE ----------------
+
+    function createCardWizardState() {
+      return {
+        currentStep: 1,
+        applicationNumber: null,
+        data: {
+          fio: "Иванов Иван Иванович",
+          birthDate: "1979-01-01",
+          passportNumber: "52 60 378175",
+          passportIssuer:
+            "ОТДЕЛОМ ВНУТРЕННИХ ДЕЛ ОКТЯБРСКОГО ОКРУГА ГОРОДА АРХАНГЕЛЬСКА",
+          passportIssueDate: "2024-09-05",
+          passportDeptCode: "292-000",
+          confirmPersonal: false,
+
+          income: "",
+          employer: "",
+          familyStatus: "",
+          dependents: "",
+
+          cardType: "",
+          limit: "",
+          rate: "",
+          optSms: false,
+          optInsurance: false,
+          optLoyalty: false,
+
+          photoUploaded: false,
+          photoObjectUrl: null,
+
+          agreeProduct: false,
+
+          comment: "",
+          documentsSigned: false,
+        },
+        errors: {},
+      };
+    }
+
+    const wizardStepTitles = [
+      "Персональные данные",
+      "Дополнительные данные",
+      "Выбор карты",
+      "Параметры продукта",
+      "Фото клиента",
+      "Оформление продукта",
+      "Дозаполнение заявки",
+      "Выдача карты",
+    ];
+
+    function validateCurrentWizardStep() {
+      const w = state.cardWizard;
+      const d = w.data;
+      const errors = {};
+      switch (w.currentStep) {
+        case 1:
+          if (!d.fio.trim()) errors.fio = "Укажите ФИО";
+          if (!d.birthDate) errors.birthDate = "Укажите дату рождения";
+          if (!d.passportNumber.trim())
+            errors.passportNumber = "Укажите номер паспорта";
+          if (!d.passportIssuer.trim())
+            errors.passportIssuer = "Укажите кем выдан паспорт";
+          if (!d.passportIssueDate)
+            errors.passportIssueDate = "Укажите дату выдачи";
+          if (!d.passportDeptCode.trim())
+            errors.passportDeptCode = "Укажите код подразделения";
+          if (!d.confirmPersonal)
+            errors.confirmPersonal =
+              "Необходимо подтвердить корректность данных";
+          break;
+		case 2: {
+		const incomeStr = String(d.income || "").trim();
+		if (!incomeStr) {
+		errors.income = "Укажите ежемесячный доход";
+		} else {
+		// Проверка на ведущий ноль (не допускается, если длина >1)
+		if (incomeStr.length > 1 && incomeStr.startsWith('0')) {
+			errors.income = "Число не должно начинаться с нуля";
+		} else {
+		const num = Number(incomeStr.replace(/\s/g, ""));
+		if (isNaN(num) || num <= 0) {
+			errors.income = "Укажите положительный доход (больше 0)";
+		}
+		}
+		}
+          if (!d.familyStatus)
+            errors.familyStatus = "Выберите семейное положение";
+          break;
+        }
+        case 3:
+          if (!d.cardType) errors.cardType = "Выберите тип карты";
+          break;
+        case 5:
+          if (!d.photoUploaded)
+            errors.photoUploaded = "Подтвердите, что фото загружено";
+          break;
+        case 6:
+          if (!d.agreeProduct)
+            errors.agreeProduct =
+              "Необходимо подтвердить условия оформления";
+          break;
+        case 7:
+          if (!d.documentsSigned)
+            errors.documentsSigned = "Необходимо подтвердить, что документы подписаны";
+          break;
+        default:
+          break;
+      }
+      w.errors = errors;
+      return Object.keys(errors).length === 0;
+    }
+
+    // ---------------- CARD WIZARD RENDER ----------------
+
+    function renderCardOperationHTML() {
+      const w = state.cardWizard || createCardWizardState();
+      state.cardWizard = w;
+      const step = w.currentStep;
+      const total = wizardStepTitles.length;
+      const d = w.data;
+
+      // sidebar steps
+      const stepsHTML = wizardStepTitles
+        .map((t, idx) => {
+          const stepNum = idx + 1;
+          const completed = stepNum < step || state.cardWizardFinished;
+          const current = stepNum === step;
+          return `
+          <li class="wizard-step-item ${
+            completed ? "completed" : ""
+          } ${current ? "current" : ""}">
+            <div class="wizard-step-index">
+              ${
+                completed ? '<i class="fa-solid fa-check"></i>' : stepNum
+              }
+            </div>
+            <div class="wizard-step-title-main">${t}</div>
+          </li>`;
+        })
+        .join("");
+
+      // main form content per step
+      const formContent = (() => {
+        switch (step) {
+          case 1: {
+            return `
+              <div class="form-grid">
+                ${renderInputGroup(
+                  "fio",
+                  "ФИО",
+                  d.fio,
+                  w.errors.fio,
+                  "text",
+                )}
+                ${renderInputGroup(
+                  "birthDate",
+                  "Дата рождения",
+                  d.birthDate,
+                  w.errors.birthDate,
+                  "date",
+                )}
+                ${renderInputGroup(
+                  "passportNumber",
+                  "Номер паспорта",
+                  d.passportNumber,
+                  w.errors.passportNumber,
+                  "text",
+                )}
+                ${renderInputGroup(
+                  "passportIssuer",
+                  "Кем выдан",
+                  d.passportIssuer,
+                  w.errors.passportIssuer,
+                  "text",
+                )}
+                ${renderInputGroup(
+                  "passportIssueDate",
+                  "Дата выдачи",
+                  d.passportIssueDate,
+                  w.errors.passportIssueDate,
+                  "date",
+                )}
+                ${renderInputGroup(
+                  "passportDeptCode",
+                  "Код подразделения",
+                  d.passportDeptCode,
+                  w.errors.passportDeptCode,
+                  "text",
+                )}
+              </div>
+              <div class="form-group">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="chk-confirm-personal" ${
+                    d.confirmPersonal ? "checked" : ""
+                  } />
+                  <span>Я подтверждаю, что данные корректны</span>
+                </label>
+                ${
+                  w.errors.confirmPersonal
+                    ? `<div class="form-error">${w.errors.confirmPersonal}</div>`
+                    : ""
+                }
+              </div>
+            `;
+          }
+          case 2: {
+            return `
+              <div class="form-grid">
+                ${renderInputGroup(
+                  "income",
+                  "Ежемесячный доход (₽)",
+                  d.income,
+                  w.errors.income,
+                  "number",
+                )}
+                ${renderInputGroup(
+                  "employer",
+                  "Место работы (необязательно)",
+                  d.employer,
+                  null,
+                  "text",
+                )}
+                <div class="form-group">
+                  <label class="form-label">Семейное положение</label>
+                  <select class="form-select" id="familyStatus">
+                    <option value="">Выберите...</option>
+                    <option value="холост">холост</option>
+                    <option value="женат">женат</option>
+                    <option value="разведён">разведён</option>
+                  </select>
+                  ${
+                    w.errors.familyStatus
+                      ? `<div class="form-error">${w.errors.familyStatus}</div>`
+                      : ""
+                  }
+                </div>
+                ${renderInputGroup(
+                  "dependents",
+                  "Количество иждивенцев",
+                  d.dependents,
+                  null,
+                  "number",
+                  { min: 0 },
+                )}
+              </div>
+            `;
+          }
+          case 3: {
+            return `
+              <div class="options-list">
+                ${renderCardRadio(
+                  "classic",
+                  "Классическая",
+                  "Лимит до 300 000 ₽, ставка 25%",
+                  d.cardType === "classic",
+                )}
+                ${renderCardRadio(
+                  "gold",
+                  "Золотая",
+                  "Лимит до 600 000 ₽, ставка 22%",
+                  d.cardType === "gold",
+                )}
+                ${renderCardRadio(
+                  "platinum",
+                  "Платиновая",
+                  "Лимит до 1 500 000 ₽, ставка 19%",
+                  d.cardType === "platinum",
+                )}
+                ${
+                  w.errors.cardType
+                    ? `<div class="form-error">${w.errors.cardType}</div>`
+                    : ""
+                }
+              </div>
+            `;
+          }
+          case 4: {
+            return `
+              <div class="form-grid">
+                ${renderInputGroup(
+                  "limit",
+                  "Желаемый кредитный лимит (₽)",
+                  d.limit,
+                  null,
+                  "number",
+                  { placeholder: "Оставьте пустым для стандартного" },
+                )}
+                <div class="form-group">
+                  <label class="form-label">Процентная ставка</label>
+                  <input type="text" class="form-control" id="rate" value="${
+                    d.rate || "Выберите карту на предыдущем шаге"
+                  }" disabled />
+                </div>
+              </div>
+              <div class="options-list">
+                ${renderCheckboxOption(
+                  "optSms",
+                  "SMS-информирование (+59 ₽/мес)",
+                  d.optSms,
+                )}
+                ${renderCheckboxOption(
+                  "optInsurance",
+                  "Страхование жизни (+1.5% от лимита)",
+                  d.optInsurance,
+                )}
+                ${renderCheckboxOption(
+                  "optLoyalty",
+                  "Участие в программе лояльности",
+                  d.optLoyalty,
+                )}
+              </div>
+            `;
+          }
+          case 5: {
+            return `
+              <div class="form-group">
+                <label class="form-label">Фотография клиента</label>
+                <input type="file" id="photo-file" accept="image/*" class="form-control" />
+                <div class="photo-preview-wrap" id="photo-preview-wrap" style="${d.photoObjectUrl ? '' : 'display:none;'} margin-top:8px;">
+                  <img id="photo-preview" src="${d.photoObjectUrl || ''}" alt="Фото" class="photo-preview-img" />
+                </div>
+                ${
+                  w.errors.photoUploaded
+                    ? `<div class="form-error">${w.errors.photoUploaded}</div>`
+                    : ""
+                }
+              </div>
+            `;
+          }
+          case 6: {
+            return `
+              <table class="summary-table">
+                <tr><td>ФИО</td><td>${d.fio}</td></tr>
+                <tr><td>Дата рождения</td><td>${d.birthDate}</td></tr>
+                <tr><td>Паспорт</td><td>${d.passportNumber}</td></tr>
+                <tr><td>Кем выдан</td><td>${d.passportIssuer}</td></tr>
+                <tr><td>Дата выдачи</td><td>${d.passportIssueDate}</td></tr>
+                <tr><td>Доход</td><td>${d.income}</td></tr>
+                <tr><td>Семейное положение</td><td>${d.familyStatus}</td></tr>
+                <tr><td>Тип карты</td><td>${d.cardType}</td></tr>
+                <tr><td>Желаемый лимит</td><td>${
+                  d.limit ? d.limit + " ₽" : "по стандарту"
+                }</td></tr>
+                <tr><td>Ставка</td><td>${d.rate}</td></tr>
+                <tr><td>Опции</td><td>${
+                  [
+                    d.optSms && "SMS-информирование",
+                    d.optInsurance && "Страхование",
+                    d.optLoyalty && "Программа лояльности",
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || "—"
+                }</td></tr>
+              </table>
+              <div class="form-group">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="agreeProduct" ${
+                    d.agreeProduct ? "checked" : ""
+                  } />
+                  <span>Я ознакомлен с условиями и подтверждаю оформление</span>
+                </label>
+                ${
+                  w.errors.agreeProduct
+                    ? `<div class="form-error">${w.errors.agreeProduct}</div>`
+                    : ""
+                }
+              </div>
+            `;
+          }
+          case 7: {
+            const contractTitle = "Договор кредитной карты (стандартные условия)";
+            const contractBody = getContractText();
+            const contractFileHtml = CREDIT_CARD_CONTRACT_FILE_URL
+              ? `<div class="form-group"><a href="${CREDIT_CARD_CONTRACT_FILE_URL}" target="_blank" rel="noopener" class="btn secondary"><i class="fa-solid fa-file-pdf"></i> Открыть договор (файл)</a></div>`
+              : "";
+            return `
+              <div class="form-group">
+                <div class="document-block">
+                  <i class="fa-solid fa-file-lines"></i>
+                  <span>${contractTitle}</span>
+                </div>
+                ${contractFileHtml}
+                <div class="contract-text" id="contract-text">${contractBody}</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Комментарий к заявке (необязательно)</label>
+                <textarea class="form-textarea" id="comment">${
+                  d.comment || ""
+                }</textarea>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-inline">
+                  <input type="checkbox" id="documentsSigned" ${
+                    d.documentsSigned ? "checked" : ""
+                  } />
+                  <span>Документы подписаны</span>
+                </label>
+                ${
+                  w.errors.documentsSigned
+                    ? `<div class="form-error">${w.errors.documentsSigned}</div>`
+                    : ""
+                }
+              </div>
+            `;
+          }
+          case 8: {
+            if (!w.applicationNumber) {
+              w.applicationNumber = "CC-2026-" + String(Date.now()).slice(-8);
+            }
+            return `
+              <div style="font-size:13px;margin-bottom:8px;">
+                Карта успешно заказана. Номер заявки:
+                <strong>#${w.applicationNumber}</strong>.<br />
+                Ожидайте выпуск карты в течение 3 дней.
+              </div>
+            `;
+          }
+          default:
+            return "";
+        }
+      })();
+
+      return `
+        <div class="card">
+          <div class="wizard-layout">
+            <div class="wizard-form-section">
+              <div class="wizard-form-header">
+                <div class="wizard-form-title">
+                  Оформление кредитной карты
+                </div>
+                <!-- Скрыто по просьбе пользователя -->
+              </div>
+              ${formContent}
+              <div class="wizard-actions">
+                <button class="btn secondary" type="button" id="btn-prev" ${
+                  step === 1 ? "disabled" : ""
+                }>
+                  <i class="fa-solid fa-arrow-left"></i> Назад
+                </button>
+                <button class="btn" type="button" id="btn-next">${
+                  step === total
+                    ? '<i class="fa-solid fa-check"></i> Завершить'
+                    : 'Далее <i class="fa-solid fa-arrow-right"></i>'
+                }</button>
+              </div>
+            </div>
+            <div>
+              <ul class="wizard-steps-list">
+                ${stepsHTML}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInputGroup(
+      id,
+      label,
+      value,
+      error,
+      type = "text",
+      extra = {},
+    ) {
+      const extraAttrs = [];
+      if (extra.min !== undefined) extraAttrs.push(`min="${extra.min}"`);
+      if (extra.placeholder)
+        extraAttrs.push(`placeholder="${extra.placeholder}"`);
+      return `
+        <div class="form-group">
+          <label class="form-label">${label}</label>
+          <input type="${type}" id="${id}" class="form-control" value="${
+            value || ""
+          }" ${extraAttrs.join(" ")} />
+          ${error ? `<div class="form-error">${error}</div>` : ""}
+        </div>
+      `;
+    }
+
+    function renderCardRadio(value, label, desc, selected) {
+      const imgUrl = CARD_IMAGE_URLS[value];
+      const iconClass =
+        value === "classic"
+          ? "fa-credit-card"
+          : value === "gold"
+          ? "fa-crown"
+          : "fa-gem";
+      const imgContent = imgUrl
+        ? `<img src="${imgUrl}" alt="${label}" class="card-type-img-img" />`
+        : `<i class="fa-solid ${iconClass}"></i>`;
+      return `
+        <label class="radio-card" data-card-type="${value}">
+          <input type="radio" name="cardType" value="${value}" ${
+        selected ? "checked" : ""
+      } style="margin-top:4px;" />
+          <div class="card-type-img ${value}">${imgContent}</div>
+          <div>
+            <div>${label}</div>
+            <div class="radio-desc">${desc}</div>
+          </div>
+        </label>
+      `;
+    }
+
+    function renderCheckboxOption(key, label, checked) {
+      return `
+        <label class="checkbox-inline">
+          <input type="checkbox" id="${key}" ${checked ? "checked" : ""} />
+          <span>${label}</span>
+        </label>
+      `;
+    }
+
+    function initCardWizardHandlers() {
+      const w = state.cardWizard;
+      const d = w.data;
+
+      // step-specific bindings
+      if (w.currentStep === 1) {
+        qs("#fio").addEventListener(
+          "input",
+          (e) => (d.fio = e.target.value),
+        );
+        qs("#birthDate").addEventListener(
+          "input",
+          (e) => (d.birthDate = e.target.value),
+        );
+        qs("#passportNumber").addEventListener(
+          "input",
+          (e) => (d.passportNumber = e.target.value),
+        );
+        qs("#passportIssuer").addEventListener(
+          "input",
+          (e) => (d.passportIssuer = e.target.value),
+        );
+        qs("#passportIssueDate").addEventListener(
+          "input",
+          (e) => (d.passportIssueDate = e.target.value),
+        );
+        qs("#passportDeptCode").addEventListener(
+          "input",
+          (e) => (d.passportDeptCode = e.target.value),
+        );
+        qs("#chk-confirm-personal").addEventListener(
+          "change",
+          (e) => (d.confirmPersonal = e.target.checked),
+        );
+      } else if (w.currentStep === 2) {
+        qs("#income").addEventListener(
+          "input",
+          (e) => (d.income = e.target.value),
+        );
+        qs("#employer").addEventListener(
+          "input",
+          (e) => (d.employer = e.target.value),
+        );
+        const famSel = qs("#familyStatus");
+        famSel.value = d.familyStatus || "";
+        famSel.addEventListener(
+          "change",
+          (e) => (d.familyStatus = e.target.value),
+        );
+        qs("#dependents").addEventListener(
+          "input",
+          (e) => (d.dependents = e.target.value),
+        );
+      } else if (w.currentStep === 3) {
+        qsa("[data-card-type]").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            const v = el.getAttribute("data-card-type");
+            d.cardType = v;
+            if (v === "classic") d.rate = "25%";
+            if (v === "gold") d.rate = "22%";
+            if (v === "platinum") d.rate = "19%";
+            renderActiveTabContent();
+          });
+        });
+      } else if (w.currentStep === 4) {
+        qs("#limit").addEventListener(
+          "input",
+          (e) => (d.limit = e.target.value),
+        );
+        qsa("#optSms,#optInsurance,#optLoyalty").forEach((el) => {
+          el.addEventListener("change", (e) => {
+            d[e.target.id] = e.target.checked;
+          });
+        });
+      } else if (w.currentStep === 5) {
+        const fileInput = qs("#photo-file");
+        const previewWrap = qs("#photo-preview-wrap");
+        const previewImg = qs("#photo-preview");
+        if (d.photoObjectUrl) previewImg.setAttribute("src", d.photoObjectUrl);
+        fileInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (file && file.type.startsWith("image/")) {
+            if (d.photoObjectUrl) URL.revokeObjectURL(d.photoObjectUrl);
+            d.photoObjectUrl = URL.createObjectURL(file);
+            d.photoUploaded = true;
+            previewImg.src = d.photoObjectUrl;
+            previewWrap.style.display = "block";
+          }
+        });
+      } else if (w.currentStep === 6) {
+        qs("#agreeProduct").addEventListener(
+          "change",
+          (e) => (d.agreeProduct = e.target.checked),
+        );
+      } else if (w.currentStep === 7) {
+        qs("#comment").addEventListener(
+          "input",
+          (e) => (d.comment = e.target.value),
+        );
+        qs("#documentsSigned").addEventListener("change", (e) => {
+          d.documentsSigned = e.target.checked;
+        });
+      }
+
+      // navigation
+      const btnPrev = qs("#btn-prev");
+      const btnNext = qs("#btn-next");
+      btnPrev.addEventListener("click", () => {
+        if (w.currentStep > 1) {
+          w.currentStep -= 1;
+          renderActiveTabContent();
+        }
+      });
+      btnNext.addEventListener("click", () => {
+        const ok = validateCurrentWizardStep();
+        if (!ok) {
+          renderActiveTabContent();
+          return;
+        }
+        if (w.currentStep < wizardStepTitles.length) {
+          w.currentStep += 1;
+          renderActiveTabContent();
+        } else {
+          // Finish
+          state.cardWizardFinished = true;
+          state.savedCardWizard = null;
+          showConfirm(
+            "Карта успешно заказана. Завершить операцию и закрыть вкладку?",
+            () => {
+              const opTab = state.tabs.find(
+                (t) => t.type === "operation" && t.payload.operationName === "Карты",
+              );
+              if (opTab) {
+                closeTab(opTab.id);
+              }
+            },
+            () => {
+              // keep tab open
+              renderActiveTabContent();
+            }
+          );
+        }
+      });
+    }
+
+    // ---------------- SMS SESSION ----------------
+
+    let pendingOperationAfterSms = null;
+
+    function openSmsModal() {
+      const backdrop = qs("#sms-backdrop");
+      const input = qs("#sms-code-input");
+      const errorEl = qs("#sms-error");
+      errorEl.style.display = "none";
+      errorEl.textContent = "";
+      input.value = "";
+      backdrop.style.display = "flex";
+      setTimeout(() => input.focus(), 0);
+    }
+
+    function closeSmsModal() {
+      qs("#sms-backdrop").style.display = "none";
+    }
+
+    function initSmsModalHandlers() {
+      const btnCancel = qs("#sms-cancel");
+      const btnConfirm = qs("#sms-confirm");
+      const input = qs("#sms-code-input");
+      const errorEl = qs("#sms-error");
+      btnCancel.addEventListener("click", () => {
+        pendingOperationAfterSms = null;
+        closeSmsModal();
+      });
+      btnConfirm.addEventListener("click", () => {
+        const code = input.value.trim();
+        if (code !== "1234") {
+          errorEl.textContent = "Неверный код. Попробуйте ещё раз.";
+          errorEl.style.display = "block";
+          return;
+        }
+        // success
+        state.sessionActive = true;
+        updateSessionIndicator();
+        closeSmsModal();
+        if (pendingOperationAfterSms) {
+          const opName = pendingOperationAfterSms;
+          pendingOperationAfterSms = null;
+          handleOperationClick(opName);
+        }
+      });
+    }
+
+    function updateSessionIndicator() {
+      const btn = qs("#session-btn");
+      if (state.sessionActive) {
+        btn.textContent = `${CLIENT_SHORT_NAME} | В сессии`;
+        btn.classList.remove("secondary");
+        btn.classList.add("outline");
+        btn.disabled = true;
+      } else {
+        btn.innerHTML =
+          '<i class="fa-solid fa-play"></i> Начать сессию';
+        btn.classList.add("secondary");
+        btn.disabled = false;
+      }
+    }
+
+    // ---------------- BEFOREUNLOAD ----------------
+
+    window.addEventListener("beforeunload", (e) => {
+      const hasCardWizardInProgress = state.tabs.some(
+        (t) => t.type === "operation" && t.payload.operationName === "Карты"
+      ) && !state.cardWizardFinished;
+      if (hasCardWizardInProgress) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
+
+    // ---------------- INIT ----------------
+
+    function init() {
+      ensureMainTab();
+      qs("#client-fio").textContent = clientInfoFull.fio;
+      renderTabs();
+      renderDropdowns();
+      initDropdownClicks();
+      renderActiveTabContent();
+      updateSessionIndicator();
+      qs("#session-btn").addEventListener("click", () => {
+        if (!state.sessionActive) {
+          pendingOperationAfterSms = null;
+          openSmsModal();
+        }
+      });
+      initSmsModalHandlers();
+
+      const modals = qsa('.modal-backdrop');
+      modals.forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
